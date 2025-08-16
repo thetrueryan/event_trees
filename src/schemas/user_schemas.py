@@ -1,8 +1,4 @@
-from pydantic import (
-    BaseModel, EmailStr, SecretStr, 
-    Field, field_validator, ConfigDict
-)
-
+from pydantic import BaseModel, EmailStr, SecretStr, Field, field_validator, ConfigDict
 
 
 class EmailSchema(BaseModel):
@@ -20,7 +16,7 @@ class UserSchema(EmailSchema):
     @field_validator("active_status")
     def validate_status(cls, status: bool) -> bool:
         if not status:
-            raise ValueError("User Inactive")   
+            raise ValueError("User Inactive")
         return status
 
 

@@ -2,35 +2,21 @@ from datetime import datetime
 from typing import Annotated
 from enum import Enum
 
-from sqlalchemy import (
-    ForeignKey, 
-    text
-)
-from sqlalchemy.orm import (
-    DeclarativeBase,
-    Mapped, 
-    mapped_column, 
-    relationship
-)
+from sqlalchemy import ForeignKey, text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 # types
 created_at = Annotated[
-    datetime, mapped_column(
-        server_default=text("TIMEZONE ('utc', now())")
-        )
-    ]
+    datetime, mapped_column(server_default=text("TIMEZONE ('utc', now())"))
+]
 updated_at = Annotated[
-    datetime, mapped_column(
-        server_default=text("TIMEZONE('utc', now())")
-        )
-    ]
+    datetime, mapped_column(server_default=text("TIMEZONE('utc', now())"))
+]
 intpk = Annotated[int, mapped_column(primary_key=True)]
 usersintfk = Annotated[int, ForeignKey("users.id")]
 str_100 = Annotated[str, 100]
 str_300 = Annotated[str, 300]
-email_or_name_str = Annotated[
-    str_100, mapped_column(nullable=False, unique=True)
-    ]
+email_or_name_str = Annotated[str_100, mapped_column(nullable=False, unique=True)]
 
 
 class Status(Enum):
@@ -54,16 +40,14 @@ class UsersOrm(Base):
 
     events: Mapped[list["EventsOrm"]] = relationship(back_populates="user")
 
+
 class EventsOrm(Base):
     __tablename__ = "events"
 
     id: Mapped[intpk]
     user_id: Mapped[usersintfk]
     local_id: Mapped[int]
-    parent_id: Mapped[int] = mapped_column(
-        ForeignKey("events.id"), 
-        nullable=True
-        )
+    parent_id: Mapped[int] = mapped_column(ForeignKey("events.id"), nullable=True)
     description: Mapped[str_300]
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
