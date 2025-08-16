@@ -3,7 +3,7 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import BaseModel
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 class AuthJWT(BaseModel):
     private_key_path: Path =  BASE_DIR / "jwt_tokens" / "jwt-private.pem"
