@@ -23,4 +23,10 @@ class UserSchema(EmailSchema):
 class UserAuthSchema(UserSchema):
     model_config = UserSchema.model_config
 
-    password: SecretStr = Field(min_length=8)
+    password: SecretStr = Field(min_length=8, max_length=64)
+
+
+class RegisteredUserSchema(UserSchema):
+    model_config = UserSchema.model_config
+
+    id: int = Field(ge=1)
