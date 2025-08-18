@@ -10,6 +10,7 @@ from utils import auth_utils
 from core.logger import logger
 from utils.excepts import unknown_error, not_found_error
 
+
 class AuthService:
     def __init__(self, users_repository: UsersRepository):
         self.users_repository = users_repository
@@ -19,7 +20,7 @@ class AuthService:
             "sub": str(user.id),
             "email": user.email,
             "username": user.username,
-            "token_type": "access"
+            "token_type": "access",
         }
         return auth_utils.encode_jwt(payload)
 
@@ -30,9 +31,11 @@ class AuthService:
         }
         return auth_utils.encode_jwt(
             payload=payload,
-            expire_timedelta=timedelta(days=jwt_settings.AUTH_JWT.refresh_token_expire_days),
-            )
-    
+            expire_timedelta=timedelta(
+                days=jwt_settings.AUTH_JWT.refresh_token_expire_days
+            ),
+        )
+
     async def register_user(self, user: UserAuthSchema) -> LoggedUserSchema:
         """
         Ререстрируем пользователя, хешируем пароль и добавляем в бд, возвращаем
@@ -47,7 +50,7 @@ class AuthService:
                 username=user.username,
                 id=user_id,
             )
-        except IntegrityError as e: 
+        except IntegrityError as e:
             if "email" in str(f"Integrity Error: {e}").lower():
                 detail = "Пользователь с таким email уже существует"
             elif "username" in str(e).lower():
@@ -55,14 +58,11 @@ class AuthService:
             else:
                 detail = "Пользователь с такими данными уже существует"
             logger.error(e)
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, 
-                detail=detail
-                )
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=detail)
         except Exception as e:
             logger.error(f"Unknown ERROR: {e}")
             raise unknown_error
-    
+
     async def login_user(self, user: UserAuthSchema) -> LoggedUserSchema:
         """
         Логиним пользователя, отправляем запрос к базе, проверяем пароль
@@ -71,20 +71,19 @@ class AuthService:
             user_data = await self.users_repository.get_one(user.id)
             if not user_data:
                 raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
                 )
             if not auth_utils.validate_password(user_data.password):
-                 raise HTTPException(
+                raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Incorrect password",
-                    )
-            
+                )
+
             return LoggedUserSchema(
-                        email=user.email,
-                        username=user.username,
-                        id=user_data.id,
-                    )
+                email=user.email,
+                username=user.username,
+                id=user_data.id,
+            )
 
         except Exception as e:
             logger.error(f"Unknown ERROR: {e}")

@@ -11,23 +11,13 @@ class UsersRepository(AbstractRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_one(
-            self,
-            user: dict
-    ) -> int:
-        stmt = (
-            insert(UsersOrm)
-            .values(**user).
-            returning(UsersOrm.id)
-            )
+    async def add_one(self, user: dict) -> int:
+        stmt = insert(UsersOrm).values(**user).returning(UsersOrm.id)
         res = await self.session.execute(stmt)
         await self.session.commit()
         return res.scalar_one_or_none()
-        
-    async def get_one(
-            self,
-            user_id: int
-    ) -> UsersOrm:
+
+    async def get_one(self, user_id: int) -> UsersOrm:
         stmt = (
             select(UsersOrm)
             .where(UsersOrm.id == user_id)
@@ -35,4 +25,3 @@ class UsersRepository(AbstractRepository):
         )
         res = await self.session.execute(stmt)
         return res.scalar_one_or_none()
-    

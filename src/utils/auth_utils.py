@@ -40,6 +40,7 @@ def decode_jwt(
     decoded = jwt.decode(jwt=token, key=public_key, algorithms=[algorithm])
     return decoded
 
+
 def hash_password(
     password: str,
 ) -> bytes:

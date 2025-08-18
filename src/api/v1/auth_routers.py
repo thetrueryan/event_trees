@@ -7,17 +7,15 @@ from services.auth_service import AuthService
 from core.logger import logger
 from utils.excepts import unknown_error
 
-router = APIRouter(
-    tags=["Аутентификация"]
-)
+router = APIRouter(tags=["Аутентификация"])
 
 
 @router.post(
-        "/register",
-        response_model=TokenInfo,
-        status_code=status.HTTP_201_CREATED,
-        summary="регистрация нового пользователя"
-        )
+    "/register",
+    response_model=TokenInfo,
+    status_code=status.HTTP_201_CREATED,
+    summary="регистрация нового пользователя",
+)
 async def register(
     user: UserAuthSchema,
     auth_service: AuthService = Depends(get_auth_service),
@@ -30,12 +28,11 @@ async def register(
     except Exception as e:
         logger.error(f"Unknown ERROR: {e}")
         raise unknown_error
-    
+
+
 @router.post(
-        "/login",
-        response_model=TokenInfo,
-        summary="регистрация нового пользователя"
-        )
+    "/login", response_model=TokenInfo, summary="регистрация нового пользователя"
+)
 async def login(
     user: UserAuthSchema,
     auth_service: AuthService = Depends(get_auth_service),
@@ -48,4 +45,3 @@ async def login(
     except Exception as e:
         logger.error(f"Unknown ERROR: {e}")
         raise unknown_error
-    
