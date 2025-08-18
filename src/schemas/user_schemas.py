@@ -26,7 +26,7 @@ class UserAuthSchema(UserSchema):
     password: SecretStr = Field(min_length=8, max_length=64)
 
 
-class RegisteredUserSchema(UserSchema):
+class LoggedUserSchema(UserSchema):
     model_config = UserSchema.model_config
 
     id: int = Field(ge=1)

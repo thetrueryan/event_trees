@@ -1,26 +1,48 @@
+from datetime import timedelta
+
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
+from core.config import jwt_settings
 from repositories.users_repo import UsersRepository
-from schemas.user_schemas import RegisteredUserSchema, UserAuthSchema
-from utils.auth_utils import hash_password
+from schemas.user_schemas import LoggedUserSchema, UserAuthSchema
+from utils import auth_utils
 from core.logger import logger
-
+from utils.excepts import unknown_error, not_found_error
 
 class AuthService:
     def __init__(self, users_repository: UsersRepository):
         self.users_repository = users_repository
 
-    async def register_user(self, user: UserAuthSchema) -> RegisteredUserSchema:
+    async def create_access_token(self, user: LoggedUserSchema) -> str:
+        payload = {
+            "sub": str(user.id),
+            "email": user.email,
+            "username": user.username,
+            "token_type": "access"
+        }
+        return auth_utils.encode_jwt(payload)
+
+    async def create_refresh_token(self, user: LoggedUserSchema) -> str:
+        payload = {
+            "sub": str(user.id),
+            "token_type": "refresh",
+        }
+        return auth_utils.encode_jwt(
+            payload=payload,
+            expire_timedelta=timedelta(days=jwt_settings.AUTH_JWT.refresh_token_expire_days),
+            )
+    
+    async def register_user(self, user: UserAuthSchema) -> LoggedUserSchema:
         """
         Ререстрируем пользователя, хешируем пароль и добавляем в бд, возвращаем
         схему для генерации токенов
         """
         try:
-            user.password = hash_password(user.password)
+            user.password = auth_utils.hash_password(user.password)
             user_id = await self.users_repository.add_one(user.model_dump())
             logger.info(f"user: {user.email} with id: {user_id} registered succesfully")
-            return RegisteredUserSchema(
+            return LoggedUserSchema(
                 email=user.email,
                 username=user.username,
                 id=user_id,
@@ -39,7 +61,31 @@ class AuthService:
                 )
         except Exception as e:
             logger.error(f"Unknown ERROR: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Произошла ошибка на стороне сервера"
-            )
+            raise unknown_error
+    
+    async def login_user(self, user: UserAuthSchema) -> LoggedUserSchema:
+        """
+        Логиним пользователя, отправляем запрос к базе, проверяем пароль
+        """
+        try:
+            user_data = await self.users_repository.get_one(user.id)
+            if not user_data:
+                raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+                )
+            if not auth_utils.validate_password(user_data.password):
+                 raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Incorrect password",
+                    )
+            
+            return LoggedUserSchema(
+                        email=user.email,
+                        username=user.username,
+                        id=user_data.id,
+                    )
+
+        except Exception as e:
+            logger.error(f"Unknown ERROR: {e}")
+            raise unknown_error
