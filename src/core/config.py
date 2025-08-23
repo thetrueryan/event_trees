@@ -14,19 +14,16 @@ class AuthJWT(BaseModel):
     refresh_token_expire_days: int = 30
 
 
-class JWTSettings(BaseSettings):
+class Settings(BaseSettings):
     AUTH_JWT: AuthJWT = AuthJWT()
 
-
-jwt_settings = JWTSettings()
-
-
-class DBSettings(BaseSettings):
     DB_HOST: str
     DB_NAME: str
     DB_PASS: str
     DB_USER: str
     DB_PORT: int
+
+    MODE: str
 
     @property
     def DATABASE_URL_ASYNC(self):
@@ -39,7 +36,7 @@ class DBSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
 
-db_settings = DBSettings()
+settings = Settings()
 
-DB_ASYNC_URL = db_settings.DATABASE_URL_ASYNC
-DB_SYNC_URL = db_settings.DATABASE_URL_SYNC
+DB_ASYNC_URL = settings.DATABASE_URL_ASYNC
+DB_SYNC_URL = settings.DATABASE_URL_SYNC

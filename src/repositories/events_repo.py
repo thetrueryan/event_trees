@@ -2,8 +2,8 @@ from sqlalchemy import select, insert
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.sql_models import UsersOrm
-from repositories.abstract_repo import AbstractRepository
+from src.models.sql_models import UsersOrm
+from src.repositories.abstract_repo import AbstractRepository
 
 
 class EventsRepository(AbstractRepository):

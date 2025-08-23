@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from schemas.other_schemas import TokenInfo
-from schemas.user_schemas import UserAuthSchema
-from utils.dependencies import get_auth_service
-from services.auth_service import AuthService
-from core.logger import logger
-from utils.excepts import unknown_error
+from src.schemas.other_schemas import TokenInfo
+from src.schemas.user_schemas import UserAuthSchema
+from src.utils.dependencies import get_auth_service
+from src.services.auth_service import AuthService
+from src.core.logger import logger
+from src.utils.excepts import unknown_error
 
 router = APIRouter(tags=["Аутентификация"])
 

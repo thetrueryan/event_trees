@@ -2,7 +2,7 @@ import logging
 from logging import Logger
 from logging.handlers import RotatingFileHandler
 
-from core.config import BASE_DIR
+from src.core.config import BASE_DIR
 
 logger_path = BASE_DIR / "logs" / "app_logs.log"
 logger_path.parent.mkdir(parents=True, exist_ok=True)

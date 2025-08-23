@@ -3,14 +3,14 @@ from datetime import timedelta, datetime, timezone
 import jwt
 import bcrypt
 
-from core.config import jwt_settings
+from src.core.config import settings
 
 
 def encode_jwt(
     payload: dict,
-    private_key: str = jwt_settings.AUTH_JWT.private_key_path.read_text(),
-    algorithm: str = jwt_settings.AUTH_JWT.algorithm,
-    expire_minutes: int = jwt_settings.AUTH_JWT.access_token_expire_minutes,
+    private_key: str = settings.AUTH_JWT.private_key_path.read_text(),
+    algorithm: str = settings.AUTH_JWT.algorithm,
+    expire_minutes: int = settings.AUTH_JWT.access_token_expire_minutes,
     expire_timedelta: timedelta | None = None,
 ):
     to_encode = payload.copy()
@@ -34,8 +34,8 @@ def encode_jwt(
 
 def decode_jwt(
     token: str | bytes,
-    public_key: str = jwt_settings.AUTH_JWT.public_key_path.read_text(),
-    algorithm: str = jwt_settings.AUTH_JWT.algorithm,
+    public_key: str = settings.AUTH_JWT.public_key_path.read_text(),
+    algorithm: str = settings.AUTH_JWT.algorithm,
 ):
     decoded = jwt.decode(jwt=token, key=public_key, algorithms=[algorithm])
     return decoded

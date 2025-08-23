@@ -30,3 +30,9 @@ class LoggedUserSchema(UserSchema):
     model_config = UserSchema.model_config
 
     id: int = Field(ge=1)
+
+
+class HashedUserSchema(UserSchema):
+    model_config = UserSchema.model_config
+
+    password: bytes

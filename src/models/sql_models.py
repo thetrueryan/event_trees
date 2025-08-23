@@ -19,9 +19,10 @@ str_300 = Annotated[str, 300]
 email_or_name_str = Annotated[str_100, mapped_column(nullable=False, unique=True)]
 
 
-class Status(Enum):
-    ACTIVE = True
-    INACTIVE = False
+class EventStatus(str, Enum):
+    PAST = "past"
+    CURRENT = "current"
+    FUTURE = "future"
 
 
 class Base(DeclarativeBase):
@@ -34,9 +35,9 @@ class UsersOrm(Base):
     id: Mapped[intpk]
     username: Mapped[email_or_name_str]
     email: Mapped[email_or_name_str]
-    password: Mapped[str_100] = mapped_column(nullable=False)
+    password: Mapped[bytes]
     created_at: Mapped[created_at]
-    user_status: Mapped[Status] = mapped_column(default=Status.ACTIVE)
+    user_status: Mapped[bool] = mapped_column(default=True)
 
     events: Mapped[list["EventsOrm"]] = relationship(back_populates="user")
 
@@ -45,12 +46,12 @@ class EventsOrm(Base):
     __tablename__ = "events"
 
     id: Mapped[intpk]
-    user_id: Mapped[usersintfk]
+    user_id: Mapped[usersintfk] = mapped_column(ForeignKey("users.id"), nullable=True)
     local_id: Mapped[int]
     parent_id: Mapped[int] = mapped_column(ForeignKey("events.id"), nullable=True)
     description: Mapped[str_300]
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
-    event_status: Mapped[Status] = mapped_column(default=Status.ACTIVE)
+    event_status: Mapped[EventStatus] = mapped_column(default=EventStatus.FUTURE)
 
     user: Mapped["UsersOrm"] = relationship(back_populates="events")

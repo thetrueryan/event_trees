@@ -1,0 +1,15 @@
+services:
+  test_event_trees:
+    image: postgres:latest
+    container_name: test_event_trees
+    environment:
+      POSTGRES_PASSWORD: test_pass
+      POSTGRES_DB: test_event_trees
+      POSTGRES_USER: postgres
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d test_event_trees"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

@@ -3,12 +3,12 @@ from datetime import timedelta
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
-from core.config import jwt_settings
-from repositories.users_repo import UsersRepository
-from schemas.user_schemas import LoggedUserSchema, UserAuthSchema
-from utils import auth_utils
-from core.logger import logger
-from utils.excepts import unknown_error, not_found_error
+from src.core.config import settings
+from src.repositories.users_repo import UsersRepository
+from src.schemas.user_schemas import LoggedUserSchema, UserAuthSchema, HashedUserSchema
+from src.utils import auth_utils
+from src.core.logger import logger
+from src.utils.excepts import unknown_error, not_found_error
 
 
 class AuthService:
@@ -32,7 +32,7 @@ class AuthService:
         return auth_utils.encode_jwt(
             payload=payload,
             expire_timedelta=timedelta(
-                days=jwt_settings.AUTH_JWT.refresh_token_expire_days
+                days=settings.AUTH_JWT.refresh_token_expire_days
             ),
         )
 
@@ -42,8 +42,15 @@ class AuthService:
         схему для генерации токенов
         """
         try:
-            user.password = auth_utils.hash_password(user.password)
-            user_id = await self.users_repository.add_one(user.model_dump())
+            hashed_password = auth_utils.hash_password(user.password)
+            user_id = await self.users_repository.add_one(
+                HashedUserSchema(
+                    email=user.email,
+                    username=user.username,
+                    active_status=user.active_status,
+                    password=hashed_password,
+                )
+            )
             logger.info(f"user: {user.email} with id: {user_id} registered succesfully")
             return LoggedUserSchema(
                 email=user.email,
