@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime, timezone
-
+from pydantic import SecretStr
 import jwt
 import bcrypt
 
@@ -14,7 +14,7 @@ def encode_jwt(
     expire_timedelta: timedelta | None = None,
 ):
     to_encode = payload.copy()
-    now = datetime.now(timezone.utc())
+    now = datetime.utcnow()
     if expire_timedelta:
         expire = now + expire_timedelta
     else:

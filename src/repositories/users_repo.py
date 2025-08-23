@@ -24,10 +24,10 @@ class UsersRepository(AbstractRepository):
         await self.session.commit()
         return user_id
 
-    async def get_one(self, user_id: int) -> UsersOrm:
+    async def get_one(self, user_email: str) -> UsersOrm:
         stmt = (
             select(UsersOrm)
-            .where(UsersOrm.id == user_id)
+            .where(UsersOrm.email == user_email)
             .options(selectinload(UsersOrm.events))
         )
         res = await self.session.execute(stmt)

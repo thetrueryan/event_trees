@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, SecretStr, Field, field_validator, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 
 
 class EmailSchema(BaseModel):
@@ -23,7 +23,7 @@ class UserSchema(EmailSchema):
 class UserAuthSchema(UserSchema):
     model_config = UserSchema.model_config
 
-    password: SecretStr = Field(min_length=8, max_length=64)
+    password: str = Field(min_length=8, max_length=64)
 
 
 class LoggedUserSchema(UserSchema):

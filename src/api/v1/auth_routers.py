@@ -20,14 +20,10 @@ async def register(
     user: UserAuthSchema,
     auth_service: AuthService = Depends(get_auth_service),
 ):
-    try:
-        registered_user = await auth_service.register_user(user)
-        access_token = await auth_service.create_access_token(registered_user)
-        refresh_token = await auth_service.create_refresh_token(registered_user)
-        return TokenInfo(access_token, refresh_token)
-    except Exception as e:
-        logger.error(f"Unknown ERROR: {e}")
-        raise unknown_error
+    registered_user = await auth_service.register_user(user)
+    access_token = await auth_service.create_access_token(registered_user)
+    refresh_token = await auth_service.create_refresh_token(registered_user)
+    return TokenInfo(access_token=access_token, refresh_token=refresh_token)
 
 
 @router.post(
@@ -37,11 +33,7 @@ async def login(
     user: UserAuthSchema,
     auth_service: AuthService = Depends(get_auth_service),
 ):
-    try:
-        logged_user = await auth_service.login_user(user)
-        access_token = await auth_service.create_access_token(logged_user)
-        refresh_token = await auth_service.create_refresh_token(logged_user)
-        return TokenInfo(access_token, refresh_token)
-    except Exception as e:
-        logger.error(f"Unknown ERROR: {e}")
-        raise unknown_error
+    logged_user = await auth_service.login_user(user)
+    access_token = await auth_service.create_access_token(logged_user)
+    refresh_token = await auth_service.create_refresh_token(logged_user)
+    return TokenInfo(access_token=access_token, refresh_token=refresh_token)

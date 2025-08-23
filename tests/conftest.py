@@ -1,6 +1,7 @@
 import pytest
 import pytest_asyncio
 import asyncio
+from unittest.mock import AsyncMock
 
 from src.utils.session import async_engine, sync_engine, async_session
 from src.schemas.user_schemas import HashedUserSchema, UserAuthSchema
@@ -61,5 +62,19 @@ def user_auth():
         email="testmail@test.com",
         username="Slava",
         password="secretpass",
+        active_status=True,
+    )
+    return user
+
+
+@pytest.fixture
+def user_orm():
+    pass1 = hash_password("secretpass")
+    user = UsersOrm(
+        id=1,
+        email="testmail@test.com",
+        username="Slava",
+        password=pass1,
+        user_status=True,
     )
     return user

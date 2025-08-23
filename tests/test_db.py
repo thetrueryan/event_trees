@@ -8,11 +8,10 @@ from src.models.sql_models import UsersOrm
 
 @pytest.mark.asyncio
 async def test_add_and_get_users(users, test_session):
-    print(settings.DB_NAME)
     assert settings.MODE == "TEST"
     repo = UsersRepository(test_session)
     for user in users:
         uid = await repo.add_one(user)
         assert isinstance(uid, int)
-        user = await repo.get_one(uid)
+        user = await repo.get_one(user.email)
         assert isinstance(user, UsersOrm)
