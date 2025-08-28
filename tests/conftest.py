@@ -7,7 +7,6 @@ from src.schemas.user_schemas import (
     UserAuthSchema,
     UserRegisterSchema,
 )
-from src.utils.auth_utils import hash_password
 from src.models.sql_models import Base, UsersOrm
 
 
@@ -44,6 +43,8 @@ async def create_tables():
 
 @pytest.fixture
 def users():
+    from src.utils.auth_utils import hash_password
+
     pass1 = hash_password("secretpass")
     pass2 = hash_password("qwerty123")
 
@@ -85,6 +86,8 @@ def user_auth():
 
 @pytest.fixture
 def user_orm():
+    from src.utils.auth_utils import hash_password
+
     pass1 = hash_password("secretpass")
     user = UsersOrm(
         id=1,
