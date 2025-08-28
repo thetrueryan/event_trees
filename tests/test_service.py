@@ -10,16 +10,16 @@ from src.models.sql_models import UsersOrm
 
 
 @pytest.mark.asyncio
-async def test_register(user_auth):
+async def test_register(user_register):
     mock_repo = AsyncMock(spec=UsersRepository)
     mock_repo.add_one.return_value = 1
 
     service = AuthService(mock_repo)
-    user = await service.register_user(user_auth)
+    user = await service.register_user(user_register)
 
     assert isinstance(user, LoggedUserSchema)
-    assert user.email == user_auth.email
-    assert user.username == user_auth.username
+    assert user.email == user_register.email
+    assert user.username == user_register.username
     assert user.id == 1
 
 
@@ -33,5 +33,4 @@ async def test_login(user_auth, user_orm):
 
     assert isinstance(user, LoggedUserSchema)
     assert user.email == user_auth.email
-    assert user.username == user_auth.username
     assert user.id == 1

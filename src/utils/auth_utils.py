@@ -1,9 +1,10 @@
-from datetime import timedelta, datetime, timezone
-from pydantic import SecretStr
+from datetime import timedelta, datetime
 import jwt
 import bcrypt
 
 from src.core.config import settings
+from src.models.sql_models import UsersOrm
+from src.schemas.user_schemas import LoggedUserSchema
 
 
 def encode_jwt(
@@ -56,4 +57,12 @@ def validate_password(
     return bcrypt.checkpw(
         password=password.encode(),
         hashed_password=hashed_password,
+    )
+
+
+def logged_schema_from_orm(user: UsersOrm) -> LoggedUserSchema:
+    return LoggedUserSchema(
+        email=user.email,
+        username=user.username,
+        id=user.id,
     )

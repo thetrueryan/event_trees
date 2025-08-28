@@ -4,7 +4,11 @@ import asyncio
 from unittest.mock import AsyncMock
 
 from src.utils.session import async_engine, sync_engine, async_session
-from src.schemas.user_schemas import HashedUserSchema, UserAuthSchema
+from src.schemas.user_schemas import (
+    HashedUserSchema,
+    UserAuthSchema,
+    UserRegisterSchema,
+)
 from src.utils.auth_utils import hash_password
 from src.models.sql_models import Base, UsersOrm, EventsOrm
 
@@ -57,10 +61,20 @@ def users():
 
 
 @pytest.fixture
+def user_register():
+    user = UserRegisterSchema(
+        email="testmail@test.com",
+        username="Slava",
+        password="secretpass",
+        active_status=True,
+    )
+    return user
+
+
+@pytest.fixture
 def user_auth():
     user = UserAuthSchema(
         email="testmail@test.com",
-        username="Slava",
         password="secretpass",
         active_status=True,
     )

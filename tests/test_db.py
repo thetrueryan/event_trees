@@ -13,5 +13,5 @@ async def test_add_and_get_users(users, test_session):
     for user in users:
         uid = await repo.add_one(user)
         assert isinstance(uid, int)
-        user = await repo.get_one(user.email)
+        user = await repo.get_one(user_email=user.email)
         assert isinstance(user, UsersOrm)

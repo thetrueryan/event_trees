@@ -49,6 +49,7 @@ class EventsOrm(Base):
     user_id: Mapped[usersintfk] = mapped_column(ForeignKey("users.id"), nullable=True)
     local_id: Mapped[int]
     parent_id: Mapped[int] = mapped_column(ForeignKey("events.id"), nullable=True)
+    name: Mapped[str_100]
     description: Mapped[str_300]
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]

@@ -24,11 +24,16 @@ class UsersRepository(AbstractRepository):
         await self.session.commit()
         return user_id
 
-    async def get_one(self, user_email: str) -> UsersOrm:
-        stmt = (
-            select(UsersOrm)
-            .where(UsersOrm.email == user_email)
-            .options(selectinload(UsersOrm.events))
-        )
+    async def get_one(
+        self, user_id: int | None = None, user_email: str | None = None
+    ) -> UsersOrm | None:
+        if not user_id and not user_email:
+            return None
+
+        if user_id:
+            stmt = select(UsersOrm).where(UsersOrm.id == user_id)
+
+        if user_email:
+            stmt = select(UsersOrm).where(UsersOrm.email == user_email)
         res = await self.session.execute(stmt)
         return res.scalar_one_or_none()

@@ -5,10 +5,16 @@ from sqlalchemy.exc import IntegrityError
 
 from src.core.config import settings
 from src.repositories.users_repo import UsersRepository
-from src.schemas.user_schemas import LoggedUserSchema, UserAuthSchema, HashedUserSchema
+from src.schemas.user_schemas import (
+    LoggedUserSchema,
+    UserAuthSchema,
+    HashedUserSchema,
+    UserRegisterSchema,
+)
 from src.utils import auth_utils
 from src.core.logger import logger
 from src.utils.excepts import unknown_error
+from src.models.sql_models import UsersOrm
 
 
 class AuthService:
@@ -21,7 +27,7 @@ class AuthService:
                 "sub": str(user.id),
                 "email": user.email,
                 "username": user.username,
-                "token_type": "access",
+                "type": "access",
             }
             return auth_utils.encode_jwt(payload)
         except Exception as e:
@@ -31,7 +37,7 @@ class AuthService:
         try:
             payload = {
                 "sub": str(user.id),
-                "token_type": "refresh",
+                "type": "refresh",
             }
             return auth_utils.encode_jwt(
                 payload=payload,
@@ -42,7 +48,7 @@ class AuthService:
         except Exception as e:
             logger.error(f"error: {e}")
 
-    async def register_user(self, user: UserAuthSchema) -> LoggedUserSchema:
+    async def register_user(self, user: UserRegisterSchema) -> LoggedUserSchema:
         """
         Ререстрируем пользователя, хешируем пароль и добавляем в бд, возвращаем
         схему для генерации токенов
@@ -75,7 +81,7 @@ class AuthService:
         Логиним пользователя, отправляем запрос к базе, проверяем пароль
         """
         try:
-            user_data = await self.users_repository.get_one(user.email)
+            user_data = await self.users_repository.get_one(user_email=user.email)
             if not user_data:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -87,11 +93,7 @@ class AuthService:
                     detail="Incorrect password",
                 )
 
-            return LoggedUserSchema(
-                email=user_data.email,
-                username=user_data.username,
-                id=user_data.id,
-            )
+            return auth_utils.logged_schema_from_orm(user_data)
 
         except HTTPException:
             raise
