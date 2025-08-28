@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]
 
 DB_ASYNC_URL = settings.DATABASE_URL_ASYNC
 DB_SYNC_URL = settings.DATABASE_URL_SYNC

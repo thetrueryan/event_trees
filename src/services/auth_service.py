@@ -21,7 +21,7 @@ class AuthService:
     def __init__(self, users_repository: UsersRepository):
         self.users_repository = users_repository
 
-    async def create_access_token(self, user: LoggedUserSchema):
+    async def create_access_token(self, user: LoggedUserSchema) -> str | None:
         try:
             payload = {
                 "sub": str(user.id),
@@ -32,8 +32,9 @@ class AuthService:
             return auth_utils.encode_jwt(payload)
         except Exception as e:
             logger.error(f"error: {e}")
+            raise unknown_error
 
-    async def create_refresh_token(self, user: LoggedUserSchema) -> str:
+    async def create_refresh_token(self, user: LoggedUserSchema) -> str | None:
         try:
             payload = {
                 "sub": str(user.id),
@@ -47,6 +48,7 @@ class AuthService:
             )
         except Exception as e:
             logger.error(f"error: {e}")
+            raise unknown_error
 
     async def register_user(self, user: UserRegisterSchema) -> LoggedUserSchema:
         """

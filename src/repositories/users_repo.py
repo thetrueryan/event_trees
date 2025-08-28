@@ -4,10 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.schemas.user_schemas import HashedUserSchema
 from src.models.sql_models import UsersOrm
-from src.repositories.abstract_repo import AbstractRepository
 
 
-class UsersRepository(AbstractRepository):
+class UsersRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 

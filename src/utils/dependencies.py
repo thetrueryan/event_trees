@@ -63,7 +63,12 @@ async def get_current_auth_user(
             detail=f"Invalid token type: {token_type}",
         )
 
-    user_id: int | None = int(payload.get("sub"))
+    user_id_str = payload.get("sub")
+    if not user_id_str:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=f"invalid token error"
+        )
+    user_id = int(user_id_str)
     user = await auth_service.users_repository.get_one(user_id=user_id)
 
     if not user:
@@ -84,7 +89,12 @@ async def get_current_user_for_refresh(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid token type: {token_type}",
         )
-    user_id: int | None = int(payload.get("sub"))
+    user_id_str = payload.get("sub")
+    if not user_id_str:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=f"invalid token error"
+        )
+    user_id = int(user_id_str)
     user = await auth_service.users_repository.get_one(user_id=user_id)
     if not user:
         raise HTTPException(
