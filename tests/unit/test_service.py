@@ -8,7 +8,8 @@ from src.repositories.users_repo import UsersRepository
 from src.schemas.user_schemas import LoggedUserSchema
 from src.models.sql_models import UsersOrm
 
-skip_in_ci = pytest.mark.skipif(os.getenv('CI') == 'true', reason="Skipping in CI")
+skip_in_ci = pytest.mark.skipif(os.getenv("CI") == "true", reason="Skipping in CI")
+
 
 @pytest.mark.asyncio
 @skip_in_ci
