@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     DB_HOST: str | None = None
     DB_NAME: str | None = None
     DB_PASS: str | None = None
-    DB_USER: str | None = None 
+    DB_USER: str | None = None
     DB_PORT: int | None = None
 
     MODE: str | None = None
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
 
-settings = Settings() 
+settings = Settings()
 
 DB_ASYNC_URL = settings.DATABASE_URL_ASYNC
 DB_SYNC_URL = settings.DATABASE_URL_SYNC
