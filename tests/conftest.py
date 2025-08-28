@@ -1,16 +1,14 @@
 import pytest
 import pytest_asyncio
 import asyncio
-from unittest.mock import AsyncMock
 
-from src.utils.session import async_engine, sync_engine, async_session
 from src.schemas.user_schemas import (
     HashedUserSchema,
     UserAuthSchema,
     UserRegisterSchema,
 )
 from src.utils.auth_utils import hash_password
-from src.models.sql_models import Base, UsersOrm, EventsOrm
+from src.models.sql_models import Base, UsersOrm
 
 
 @pytest.fixture(scope="session")
@@ -25,12 +23,16 @@ def event_loop():
 
 @pytest_asyncio.fixture
 async def test_session():
+    from src.utils.session import async_session
+
     async with async_session() as session:
         yield session
 
 
 @pytest_asyncio.fixture()
 async def create_tables():
+    from src.utils.session import async_engine
+
     print("Creating tables...")
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
