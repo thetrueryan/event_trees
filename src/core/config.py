@@ -17,13 +17,13 @@ class AuthJWT(BaseModel):
 class Settings(BaseSettings):
     AUTH_JWT: AuthJWT = AuthJWT()
 
-    DB_HOST: str
-    DB_NAME: str
-    DB_PASS: str
-    DB_USER: str
-    DB_PORT: int
+    DB_HOST: str | None = None
+    DB_NAME: str | None = None
+    DB_PASS: str | None = None
+    DB_USER: str | None = None 
+    DB_PORT: int | None = None
 
-    MODE: str
+    MODE: str | None = None
 
     @property
     def DATABASE_URL_ASYNC(self):
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
 
-settings = Settings()  # type: ignore[call-arg]
+settings = Settings() 
 
 DB_ASYNC_URL = settings.DATABASE_URL_ASYNC
 DB_SYNC_URL = settings.DATABASE_URL_SYNC
