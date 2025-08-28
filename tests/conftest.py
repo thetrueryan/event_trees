@@ -29,7 +29,7 @@ async def test_session():
         yield session
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture()
 async def create_tables():
     print("Creating tables...")
     async with async_engine.begin() as conn:
