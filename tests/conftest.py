@@ -7,7 +7,7 @@ from src.schemas.user_schemas import (
     HashedUserSchema,
     UserAuthSchema,
     UserRegisterSchema,
-    LoggedUserSchema
+    LoggedUserSchema,
 )
 from src.schemas.event_schemas import NoIdsEventSchema
 from src.models.sql_models import Base, UsersOrm, EventStatus
@@ -107,11 +107,9 @@ def user_orm():
 @pytest.fixture
 def user_logged():
     return LoggedUserSchema(
-        email="testmail@test.com",
-        username="Slava",
-        active_status=True,
-        id=1
+        email="testmail@test.com", username="Slava", active_status=True, id=1
     )
+
 
 @pytest.fixture
 def no_id_events():
@@ -119,22 +117,22 @@ def no_id_events():
         NoIdsEventSchema(
             user_id=1,
             name="first_event",
-            description= "rk0gr0gk rgkr0gkg rkgr",
+            description="rk0gr0gk rgkr0gkg rkgr",
             event_status=EventStatus.FUTURE,
-            parent_id = 2
+            parent_id=2,
         ),
         NoIdsEventSchema(
             user_id=1,
             name="second_event",
-            description= "rk0gr0gk rgkr0gkg rkgr",
+            description="rk0gr0gk rgkr0gkg rkgr",
             event_status="current",
-            parent_id = 4
+            parent_id=4,
         ),
         NoIdsEventSchema(
             user_id=1,
             name="third_event",
-            description= "rk0gr0gk rgkr0gkg rkgr",
+            description="rk0gr0gk rgkr0gkg rkgr",
             event_status=EventStatus.PAST,
-            parent_id = 4
+            parent_id=4,
         ),
     ]

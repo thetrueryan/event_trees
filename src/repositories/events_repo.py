@@ -19,8 +19,9 @@ class EventsRepository:
         )
         res = await self.session.execute(stmt)
         events = res.scalars().all()
-
-        return [events_from_orm_to_schema(event) for event in events]
+        if events:
+            return [events_from_orm_to_schema(event) for event in events]
+        return None
 
     async def add_one(self, event: LocalIdEventSchema) -> int | None:
         new_event = EventsOrm(

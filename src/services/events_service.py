@@ -18,7 +18,7 @@ class EventsService:
 
     async def add_event(
         self, user: LoggedUserSchema, event_no_id: NoIdsEventSchema
-    ) -> EventSchema:
+    ) -> EventSchema | None:
         try:
             max_event_local_id = await self.events_repository.get_max_local_id(user.id)
             if not max_event_local_id:
@@ -39,15 +39,16 @@ class EventsService:
                 local_id=new_local_id,
             )
             event_id = await self.events_repository.add_one(event)
-            return EventSchema(
-                user_id=event.user_id,
-                name=event.name,
-                description=event.description,
-                event_status=event_no_id.event_status,
-                parent_id=event.parent_id,
-                local_id=event.local_id,
-                id=event_id,
-            )
+            if event_id:
+                return EventSchema(
+                    user_id=event.user_id,
+                    name=event.name,
+                    description=event.description,
+                    event_status=event_no_id.event_status,
+                    parent_id=event.parent_id,
+                    local_id=event.local_id,
+                    id=event_id,
+                )
         except ValueError as e:
             logger.error(e)
             raise HTTPException(
@@ -57,3 +58,4 @@ class EventsService:
         except Exception as e:
             logger.error(f"Unknown error: {e}")
             raise unknown_error
+        return None
