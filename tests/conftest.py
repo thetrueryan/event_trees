@@ -1,6 +1,7 @@
 import pytest
 import pytest_asyncio
 import asyncio
+import os
 
 from src.schemas.user_schemas import (
     HashedUserSchema,
@@ -8,6 +9,8 @@ from src.schemas.user_schemas import (
     UserRegisterSchema,
 )
 from src.models.sql_models import Base, UsersOrm
+
+skip_in_ci = pytest.mark.skipif(os.getenv("CI") == "true", reason="Skipping in CI")
 
 
 @pytest.fixture(scope="session")
