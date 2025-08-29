@@ -3,9 +3,12 @@ import pytest_asyncio
 from unittest.mock import AsyncMock
 
 from src.services.auth_service import AuthService
+from src.services.events_service import EventsService
 from src.repositories.users_repo import UsersRepository
+from src.repositories.events_repo import EventsRepository
 from src.schemas.user_schemas import LoggedUserSchema
-from src.models.sql_models import UsersOrm
+from src.schemas.event_schemas import EventSchema
+from src.models.sql_models import UsersOrm, EventsOrm
 
 
 @pytest.mark.asyncio
@@ -33,3 +36,16 @@ async def test_login(user_auth, user_orm):
     assert isinstance(user, LoggedUserSchema)
     assert user.email == user_auth.email
     assert user.id == 1
+
+
+@pytest.mark.asyncio
+async def test_add_event(user_logged, no_id_events):
+    mock_repo = AsyncMock(spec=EventsRepository)
+    mock_repo.get_max_local_id.return_value = 4
+    mock_repo.add_one.return_value = 5
+    service = EventsService(mock_repo)
+    for no_id_event in no_id_events:
+        event = await service.add_event(user=user_logged, event_no_id=no_id_event)
+        assert isinstance(event, EventSchema)
+        assert event.local_id > event.parent_id
+        mock_repo.get_max_local_id.return_value = event.local_id
