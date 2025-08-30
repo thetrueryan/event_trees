@@ -10,7 +10,7 @@ class NoIdsEventSchema(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     description: str = Field(min_length=3, max_length=300)
     event_status: str | EventStatus
-    parent_id: int = Field(ge=1, default=1)
+    parent_id: int | None = Field(ge=1, default=None)
 
     @field_validator("event_status")
     def validate_event_status(

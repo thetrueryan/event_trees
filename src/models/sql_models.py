@@ -48,11 +48,11 @@ class EventsOrm(Base):
     id: Mapped[intpk]
     user_id: Mapped[usersintfk] = mapped_column(ForeignKey("users.id"), nullable=True)
     local_id: Mapped[int]
-    parent_id: Mapped[int] = mapped_column(ForeignKey("events.id"), nullable=True)
+    parent_id: Mapped[int] = mapped_column(nullable=True)
     name: Mapped[str_100]
     description: Mapped[str_300]
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
-    event_status: Mapped[EventStatus] = mapped_column(default=EventStatus.FUTURE)
+    event_status: Mapped[EventStatus]
 
     user: Mapped["UsersOrm"] = relationship(back_populates="events")
