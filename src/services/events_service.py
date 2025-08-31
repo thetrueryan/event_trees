@@ -3,7 +3,13 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
 from src.models.sql_models import EventStatus
 from src.repositories.events_repo import EventsRepository
-from src.schemas.event_schemas import EventSchema, NoIdsEventSchema, LocalIdEventSchema
+from src.schemas.event_schemas import (
+    EventSchema,
+    NoIdsEventSchema,
+    LocalIdEventSchema,
+    EventToUpdateSchema,
+    UserIdEventSchema,
+)
 from src.schemas.user_schemas import LoggedUserSchema
 from src.core.logger import logger
 from src.utils.excepts import unknown_error, not_found_error
@@ -27,18 +33,22 @@ class EventsService:
         add event buisness logic
         """
         try:
-            max_event_local_id = await self.events_repository.get_max_local_id(user.id)
-            if not max_event_local_id:
+            local_ids = await self.events_repository.get_local_ids(user.id)
+            if not local_ids:
                 new_local_id = 1
             else:
-                new_local_id = max_event_local_id + 1
+                max_local_id = max(local_ids)
+                new_local_id = max_local_id + 1
             if event_no_id.parent_id:
-                if event_no_id.parent_id > new_local_id:
+                if (
+                    event_no_id.parent_id > new_local_id
+                    or event_no_id.parent_id not in local_ids
+                ):
                     raise ValueError(
                         f"parent event not create (id: {event_no_id.parent_id})"
                     )
             event = LocalIdEventSchema(
-                user_id=event_no_id.user_id,
+                user_id=user.id,
                 name=event_no_id.name,
                 description=event_no_id.description,
                 event_status=event_no_id.event_status,
@@ -103,3 +113,26 @@ class EventsService:
             child_events=child_status,
         )
         return delete_status
+
+    async def update_event_by_local_id(
+        self,
+        user: LoggedUserSchema,
+        event_local_id: int,
+        event_data: EventToUpdateSchema,
+    ) -> bool:
+        if event_data.parent_id and event_data.parent_id >= event_local_id:
+            raise HTTPException(
+                status_code=422,
+                detail="parent event not create",
+            )
+        update_data = event_data.model_dump(exclude_unset=True)
+        if "parent_id" not in update_data:
+            update_data["parent_id"] = None
+        status = await self.events_repository.update_one(
+            user_id=user.id,
+            local_id=event_local_id,
+            update_data=update_data,
+        )
+        if not status:
+            raise unknown_error
+        return status

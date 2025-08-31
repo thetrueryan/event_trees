@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import select, insert, func, update, delete
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -39,10 +41,11 @@ class EventsRepository:
         await self.session.commit()
         return event_id
 
-    async def get_max_local_id(self, user_id: int) -> int | None:
-        stmt = select(func.max(EventsOrm.local_id)).where(EventsOrm.user_id == user_id)
+    async def get_local_ids(self, user_id: int) -> list[int]:
+        stmt = select(EventsOrm.local_id).where(EventsOrm.user_id == user_id)
         res = await self.session.execute(stmt)
-        return res.scalar()
+        local_ids = res.scalars().all()
+        return list(local_ids)
 
     async def get_event_by_local_id(
         self, user_id: int, local_id: int
@@ -96,4 +99,24 @@ class EventsRepository:
             return True
         except Exception as e:
             logger.error(f"Error while deleting EventsOrm: {e}")
+            return False
+
+    async def update_one(
+        self,
+        user_id: int,
+        local_id: int,
+        update_data: dict,
+    ) -> bool:
+        try:
+            update_data["updated_at"] = datetime.utcnow()
+            stmt = (
+                update(EventsOrm)
+                .where(EventsOrm.user_id == user_id, EventsOrm.local_id == local_id)
+                .values(**update_data)
+            )
+            await self.session.execute(stmt)
+            await self.session.commit()
+            return True
+        except Exception as e:
+            logger.error(e)
             return False
