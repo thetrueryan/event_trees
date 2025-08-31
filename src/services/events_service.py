@@ -120,7 +120,14 @@ class EventsService:
         event_local_id: int,
         event_data: EventToUpdateSchema,
     ) -> bool:
-        if event_data.parent_id and event_data.parent_id >= event_local_id:
+        local_ids = await self.events_repository.get_local_ids(user.id)
+        if event_local_id not in local_ids:
+            raise not_found_error
+        if (
+            event_data.parent_id
+            and event_data.parent_id >= event_local_id
+            and event_data.parent_id not in local_ids
+        ):
             raise HTTPException(
                 status_code=422,
                 detail="parent event not create",
