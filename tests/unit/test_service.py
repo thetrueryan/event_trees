@@ -48,4 +48,3 @@ async def test_add_event(user_logged, no_id_events):
         event = await service.add_event(user=user_logged, event_no_id=no_id_event)
         assert isinstance(event, EventSchema)
         assert event.local_id > event.parent_id
-        mock_repo.get_max_local_id.return_value = event.local_id
