@@ -43,3 +43,12 @@ class HashedUserSchema(UserSchema):
 
     username: str = Field(min_length=3, max_length=100)
     password: bytes
+
+
+class ToPublicUserSchema(BaseModel):
+    model_config = ConfigDict(strict=True)
+
+    id: int = Field(ge=1)
+    username: str = Field(min_length=3, max_length=100)
+    events_total: int | None
+    trees_total: int | None

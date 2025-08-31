@@ -11,6 +11,7 @@ from src.utils.auth_utils import decode_jwt, logged_schema_from_orm
 from src.services.auth_service import AuthService
 from src.services.events_service import EventsService
 from src.services.profile_service import ProfileService
+from src.services.public_service import PublicService
 
 
 # session
@@ -45,6 +46,12 @@ def get_profile_service(
     repo: UsersRepository = Depends(get_users_repository),
 ) -> ProfileService:
     return ProfileService(repo)
+
+
+def get_public_service(
+    repo: UsersRepository = Depends(get_users_repository),
+) -> PublicService:
+    return PublicService(repo)
 
 
 # oauth2passwordbearer & httpbearer

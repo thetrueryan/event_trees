@@ -2,8 +2,9 @@ from sqlalchemy import select, insert
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.schemas.user_schemas import HashedUserSchema
+from src.schemas.user_schemas import HashedUserSchema, ToPublicUserSchema
 from src.models.sql_models import UsersOrm
+from src.utils.events_utils import events_from_orm_to_schema
 
 
 class UsersRepository:
@@ -36,3 +37,23 @@ class UsersRepository:
             stmt = select(UsersOrm).where(UsersOrm.email == user_email)
         res = await self.session.execute(stmt)
         return res.scalar_one_or_none()
+
+    async def get_one_with_relationship(
+        self, user_id: int
+    ) -> ToPublicUserSchema | None:
+        stmt = (
+            select(UsersOrm)
+            .options(selectinload(UsersOrm.events))
+            .where(UsersOrm.id == user_id)
+        )
+        res = await self.session.execute(stmt)
+        user = res.scalar_one_or_none()
+        if user:
+            events = [events_from_orm_to_schema(event) for event in user.events]
+            return ToPublicUserSchema(
+                id=user.id,
+                username=user.username,
+                events_total=len(events),
+                trees_total=len([event for event in events if event.parent_id == None]),
+            )
+        return None
