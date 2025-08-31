@@ -136,3 +136,25 @@ class EventsService:
         if not status:
             raise unknown_error
         return status
+
+    async def get_user_events_data(
+        self,
+        user: LoggedUserSchema,
+    ) -> dict:
+        try:
+            events = await self.events_repository.get_all(user.id)
+            if not events:
+                events_total = None
+                trees_total = None
+            else:
+                events_total = len(events)
+                trees_total = len(
+                    [event for event in events if event.parent_id == None]
+                )
+            return {
+                "trees_total": trees_total,
+                "events_total": events_total,
+            }
+        except Exception as e:
+            logger.error(f"Unknown error: {e}")
+            raise unknown_error

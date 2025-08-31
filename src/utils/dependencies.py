@@ -10,6 +10,7 @@ from src.utils.session import async_session
 from src.utils.auth_utils import decode_jwt, logged_schema_from_orm
 from src.services.auth_service import AuthService
 from src.services.events_service import EventsService
+from src.services.profile_service import ProfileService
 
 
 # session
@@ -38,6 +39,12 @@ def get_events_service(
     repo: EventsRepository = Depends(get_events_repository),
 ) -> EventsService:
     return EventsService(repo)
+
+
+def get_profile_service(
+    repo: UsersRepository = Depends(get_users_repository),
+) -> ProfileService:
+    return ProfileService(repo)
 
 
 # oauth2passwordbearer & httpbearer
