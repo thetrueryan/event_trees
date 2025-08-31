@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.schemas.user_schemas import HashedUserSchema, ToPublicUserSchema
 from src.models.sql_models import UsersOrm
 from src.utils.events_utils import events_from_orm_to_schema
+from src.utils.public_utils import from_user_orm_to_public_user
 
 
 class UsersRepository:
@@ -49,11 +50,19 @@ class UsersRepository:
         res = await self.session.execute(stmt)
         user = res.scalar_one_or_none()
         if user:
-            events = [events_from_orm_to_schema(event) for event in user.events]
-            return ToPublicUserSchema(
-                id=user.id,
-                username=user.username,
-                events_total=len(events),
-                trees_total=len([event for event in events if event.parent_id == None]),
-            )
+            return from_user_orm_to_public_user(user)
         return None
+
+    async def get_all_with_relationship_paginated(
+        self, limit: int, skip: int
+    ) -> list[ToPublicUserSchema]:
+        stmt = (
+            select(UsersOrm)
+            .options(selectinload(UsersOrm.events))
+            .order_by(UsersOrm.id)
+            .offset(skip)
+            .limit(limit)
+        )
+        res = await self.session.execute(stmt)
+        users = res.scalars().all()
+        return [from_user_orm_to_public_user(user) for user in users]

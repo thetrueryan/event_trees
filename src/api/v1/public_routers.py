@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from src.services.public_service import PublicService
 from src.utils.dependencies import get_public_service
@@ -7,8 +7,13 @@ router = APIRouter(tags=["Публичное", "Пользователи"])
 
 
 @router.get("/users")
-async def get_all_users():
-    pass
+async def get_all_users(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    service: PublicService = Depends(get_public_service),
+):
+    res = await service.get_users_paginated(limit=limit, skip=skip)
+    return res
 
 
 @router.get("/users/{user_id}")
