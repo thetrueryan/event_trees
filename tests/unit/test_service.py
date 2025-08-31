@@ -41,10 +41,11 @@ async def test_login(user_auth, user_orm):
 @pytest.mark.asyncio
 async def test_add_event(user_logged, no_id_events):
     mock_repo = AsyncMock(spec=EventsRepository)
-    mock_repo.get_local_ids.return_value = 4
+    mock_repo.get_local_ids.return_value = [2, 4]
     mock_repo.add_one.return_value = 5
     service = EventsService(mock_repo)
     for no_id_event in no_id_events:
         event = await service.add_event(user=user_logged, event_no_id=no_id_event)
         assert isinstance(event, EventSchema)
         assert event.local_id > event.parent_id
+        mock_repo.get_local_ids.return_value.append(event.local_id)
