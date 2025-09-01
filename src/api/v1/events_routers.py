@@ -3,10 +3,16 @@ from fastapi import APIRouter, Depends
 from src.schemas.user_schemas import LoggedUserSchema
 from src.schemas.event_schemas import NoIdsEventSchema, EventToUpdateSchema
 from src.services.events_service import EventsService
-from src.utils.dependencies import get_current_auth_user, get_events_service
+from src.utils.dependencies import (
+    get_current_auth_user,
+    get_events_service,
+    http_bearer,
+)
 
 
-router = APIRouter(tags=["Пользователь", "События"])
+router = APIRouter(
+    tags=["Пользователь", "События"], dependencies=[Depends(http_bearer)]
+)
 
 
 @router.get("/user/events")
