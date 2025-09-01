@@ -7,9 +7,12 @@ from src.utils.dependencies import (
     get_current_auth_user,
     get_profile_service,
     get_events_service,
+    http_bearer,
 )
 
-router = APIRouter(tags=["Пользователь", "Профиль"])
+router = APIRouter(
+    tags=["Пользователь", "Профиль"], dependencies=[Depends(http_bearer)]
+)
 
 
 @router.get("/user")
