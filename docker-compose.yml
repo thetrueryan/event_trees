@@ -1,0 +1,67 @@
+services:
+  app:
+    image: thetrueryan/events_tree_architect:latest
+    depends_on:
+      - db
+      - redis
+    container_name: events_app
+    environment:
+      # DB
+      DB_PASS: ${DB_PASS}
+      DB_USER: ${DB_USER}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      DB_HOST: ${DB_HOST}
+      # Redis
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_PASS: ${REDIS_PASS}
+    volumes:
+      - jwt_keys:/events_app/jwt_keys
+    restart: unless-stopped
+    networks:
+      - app_network
+    command: >
+      sh -c "
+        mkdir -p jwt_keys &&
+        echo \"$$JWT_PRIVATE_KEY\" > jwt_keys/jwt-private.pem &&
+        echo \"$$JWT_PUBLIC_KEY\" > jwt_keys/jwt-public.pem &&
+
+        alembic upgrade head && uvicorn src.main:app --reload
+      "
+  db:
+    image: postgres:15-alpine
+    container_name: events_db
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    restart: unless-stopped
+    networks:
+      - app_network
+  redis:
+    image: redis:7-alpine
+    container_name: events_redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - app_network
+
+volumes:
+  jwt_keys:
+  postgres_data:
+  redis_data:
+
+networks:
+  app_network:
+    driver: bridge

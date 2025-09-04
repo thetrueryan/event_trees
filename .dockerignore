@@ -1,0 +1,65 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+.env/
+.env
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# PostgreSQL
+*.db
+
+# Logs
+logs/
+*.log
+
+# macOS / Linux / Windows junk
+.DS_Store
+Thumbs.db
+
+# Python dependency files
+pip-wheel-metadata/
+*.egg-info/
+dist/
+build/
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# MyPy
+.mypy_cache/
+
+# Backup or temp files
+*.bak
+*.tmp
+*.swp
+
+#env
+.env
+.environment
+.env.example
+.test.env
+
+#git
+.ginignore
+
+#tests
+.pytest_cache
+tests/
+
+#jwt
+*.pem
+jwt_keys/
