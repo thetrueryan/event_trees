@@ -106,7 +106,7 @@ class EventsRepository:
         user_id: int,
         local_id: int,
         update_data: dict,
-    ) -> bool:
+    ) -> EventSchema | None:
         try:
             update_data["updated_at"] = datetime.utcnow()
             stmt = (
@@ -116,7 +116,13 @@ class EventsRepository:
             )
             await self.session.execute(stmt)
             await self.session.commit()
-            return True
+            event_stmt = select(EventsOrm).where(
+                EventsOrm.user_id == user_id, EventsOrm.local_id == local_id
+            )
+            res = await self.session.execute(event_stmt)
+            event = res.scalar_one_or_none()
+            if event:
+                return events_from_orm_to_schema(event)
         except Exception as e:
             logger.error(e)
-            return False
+        return None

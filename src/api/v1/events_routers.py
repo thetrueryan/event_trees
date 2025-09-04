@@ -61,7 +61,7 @@ async def put_user_event(
     user: LoggedUserSchema = Depends(get_current_auth_user),
     service: EventsService = Depends(get_events_service),
 ):
-    status = await service.update_event_by_local_id(
+    event = await service.update_event_by_local_id(
         user=user, event_local_id=local_id, event_data=event_to_update
     )
-    return {"status": status}
+    return event

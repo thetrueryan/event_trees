@@ -70,7 +70,7 @@ class EventsService:
                     local_id=event.local_id,
                     id=event_id,
                 )
-                await self.redis_repository.add_one(new_event)
+                await self.redis_repository.set_one(new_event)
                 return new_event
         except ValueError as e:
             logger.error(e)
@@ -125,7 +125,7 @@ class EventsService:
         user: LoggedUserSchema,
         event_local_id: int,
         event_data: EventToUpdateSchema,
-    ) -> bool:
+    ) -> EventSchema | None:
         local_ids = await self.events_repository.get_local_ids(user.id)
         if event_local_id not in local_ids:
             raise not_found_error
@@ -141,14 +141,15 @@ class EventsService:
         update_data = event_data.model_dump(exclude_unset=True)
         if "parent_id" not in update_data:
             update_data["parent_id"] = None
-        status = await self.events_repository.update_one(
+        event = await self.events_repository.update_one(
             user_id=user.id,
             local_id=event_local_id,
             update_data=update_data,
         )
-        if not status:
+        if not event:
             raise unknown_error
-        return status
+        await self.redis_repository.set_one(event)
+        return event
 
     async def get_user_events_data(
         self,
