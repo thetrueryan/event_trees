@@ -18,3 +18,24 @@ class RedisRepository:
         except Exception as e:
             logger.error(f"Cannot cash in redis: {e}")
         return None
+
+    async def get_one(self, user_id: int, local_id: int) -> EventSchema | None:
+        try:
+            key = self._cache_event_key(user_id, local_id)
+            cached_event = await self.redis.get(key)
+            if not cached_event:
+                return None
+            return EventSchema.model_validate_json(cached_event)
+        except Exception as e:
+            logger.error(f"Failed to get event from cache: {e}")
+            await self.delete_one(user_id, local_id)
+            return None
+
+    async def delete_one(self, user_id: int, local_id: int) -> bool:
+        try:
+            key = self._cache_event_key(user_id, local_id)
+            result = await self.redis.delete(key)
+            return bool(result)
+        except Exception as e:
+            logger.error(f"Failed to delete event from cache: {e}")
+            return False

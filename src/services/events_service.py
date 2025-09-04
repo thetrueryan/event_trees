@@ -87,11 +87,14 @@ class EventsService:
         self, user: LoggedUserSchema, event_local_id: int
     ) -> EventSchema | None:
         try:
-            event = await self.events_repository.get_event_by_local_id(
-                user_id=user.id, local_id=event_local_id
-            )
+            event = await self.redis_repository.get_one(user.id, event_local_id)
             if not event:
-                raise not_found_error
+                event = await self.events_repository.get_event_by_local_id(
+                    user_id=user.id, local_id=event_local_id
+                )
+                if not event:
+                    raise not_found_error
+                await self.redis_repository.set_one(event)
             return event
         except SQLAlchemyError as e:
             logger.error(f"SQLAlchemy error: {e}")
@@ -118,7 +121,13 @@ class EventsService:
             event_to_delete=event_to_delete,
             child_events=child_status,
         )
-        return delete_status
+        if not delete_status:
+            raise unknown_error
+        await self.redis_repository.delete_one(user.id, event_local_id)
+        if child_events:
+            for event in child_events:
+                await self.redis_repository.delete_one(user.id, event.local_id)
+        return True
 
     async def update_event_by_local_id(
         self,
