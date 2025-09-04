@@ -11,7 +11,7 @@ class RedisRepository:
     def _cache_event_key(self, user_id: int, event_local_id: int) -> str:
         return f"user:{user_id}:event:{event_local_id}"
 
-    async def add_one(self, event: EventSchema, ttl: int | None = 3600) -> None:
+    async def add_one(self, event: EventSchema, ttl: int = 3600) -> None:
         try:
             key = self._cache_event_key(event.user_id, event.local_id)
             await self.redis.setex(name=key, time=ttl, value=event.model_dump_json())
