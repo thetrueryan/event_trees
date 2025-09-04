@@ -8,6 +8,7 @@ from src.utils import redis_module
 from src.core.logger import logger
 from src.repositories.users_repo import UsersRepository
 from src.repositories.events_repo import EventsRepository
+from src.repositories.redis_repo import RedisRepository
 from src.utils.session import async_session
 from src.utils.auth_utils import decode_jwt, logged_schema_from_orm
 from src.services.auth_service import AuthService
@@ -17,7 +18,7 @@ from src.services.public_service import PublicService
 
 
 # redis
-async def get_redis() -> Redis | None:
+async def get_redis_client() -> Redis | None:
     return redis_module.redis
 
 
@@ -27,13 +28,18 @@ async def get_session():
         yield session
 
 
-# repositories
+# repositories (SQL)
 def get_users_repository(session: AsyncSession = Depends(get_session)):
     return UsersRepository(session)
 
 
 def get_events_repository(session: AsyncSession = Depends(get_session)):
     return EventsRepository(session)
+
+
+# repositories (Redis)
+def get_redis_repository(redis: Redis = Depends(get_redis_client)):
+    return RedisRepository(redis)
 
 
 # services
@@ -44,9 +50,10 @@ def get_auth_service(
 
 
 def get_events_service(
-    repo: EventsRepository = Depends(get_events_repository),
+    sql_repo: EventsRepository = Depends(get_events_repository),
+    redis_repo: Redis = Depends(get_redis_repository),
 ) -> EventsService:
-    return EventsService(repo)
+    return EventsService(events_repository=sql_repo, redis_repository=redis_repo)
 
 
 def get_profile_service(
@@ -71,7 +78,6 @@ http_bearer = HTTPBearer(auto_error=False)
 async def get_current_token_payload(token: str = Depends(oauth2_scheme)):
     try:
         payload = decode_jwt(token=token)
-        print(payload)
     except InvalidTokenError as e:
         logger.error(f"Error in token payload: {e}")
         raise HTTPException(

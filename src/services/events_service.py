@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
 from src.models.sql_models import EventStatus
 from src.repositories.events_repo import EventsRepository
+from src.repositories.redis_repo import RedisRepository
 from src.schemas.event_schemas import (
     EventSchema,
     NoIdsEventSchema,
@@ -16,8 +17,11 @@ from src.utils.excepts import unknown_error, not_found_error
 
 
 class EventsService:
-    def __init__(self, events_repository: EventsRepository):
+    def __init__(
+        self, events_repository: EventsRepository, redis_repository: RedisRepository
+    ):
         self.events_repository = events_repository
+        self.redis_repository = redis_repository
 
     async def get_events(self, user: LoggedUserSchema) -> list[EventSchema] | None:
         """
@@ -57,7 +61,7 @@ class EventsService:
             )
             event_id = await self.events_repository.add_one(event)
             if event_id:
-                return EventSchema(
+                new_event = EventSchema(
                     user_id=event.user_id,
                     name=event.name,
                     description=event.description,
@@ -66,6 +70,8 @@ class EventsService:
                     local_id=event.local_id,
                     id=event_id,
                 )
+                await self.redis_repository.add_one(new_event)
+                return new_event
         except ValueError as e:
             logger.error(e)
             raise HTTPException(
