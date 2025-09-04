@@ -2,7 +2,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from jwt import InvalidTokenError
+from redis.asyncio import Redis
 
+from src.utils import redis_module
 from src.core.logger import logger
 from src.repositories.users_repo import UsersRepository
 from src.repositories.events_repo import EventsRepository
@@ -12,6 +14,11 @@ from src.services.auth_service import AuthService
 from src.services.events_service import EventsService
 from src.services.profile_service import ProfileService
 from src.services.public_service import PublicService
+
+
+# redis
+async def get_redis() -> Redis | None:
+    return redis_module.redis
 
 
 # session
