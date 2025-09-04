@@ -78,6 +78,7 @@ http_bearer = HTTPBearer(auto_error=False)
 async def get_current_token_payload(token: str = Depends(oauth2_scheme)):
     try:
         payload = decode_jwt(token=token)
+        print(payload)
     except InvalidTokenError as e:
         logger.error(f"Error in token payload: {e}")
         raise HTTPException(
