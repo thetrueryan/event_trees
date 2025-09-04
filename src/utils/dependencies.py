@@ -51,7 +51,7 @@ def get_auth_service(
 
 def get_events_service(
     sql_repo: EventsRepository = Depends(get_events_repository),
-    redis_repo: Redis = Depends(get_redis_repository),
+    redis_repo: RedisRepository = Depends(get_redis_repository),
 ) -> EventsService:
     return EventsService(events_repository=sql_repo, redis_repository=redis_repo)
 
