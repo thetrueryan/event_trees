@@ -1,6 +1,6 @@
 services:
   app:
-    image: thetrueryan/events_tree_architect:latest
+    image: registry.gitlab.com/thetrueryan-group/event_trees:latest
     depends_on:
       - db
       - redis
@@ -17,18 +17,24 @@ services:
       REDIS_PORT: ${REDIS_PORT}
       REDIS_DB: ${REDIS_DB}
       REDIS_PASS: ${REDIS_PASS}
+      # JWT
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
     volumes:
       - jwt_keys:/events_app/jwt_keys
+    ports:
+      - "8000:8000"
     restart: unless-stopped
     networks:
       - app_network
     command: >
       sh -c "
         mkdir -p jwt_keys &&
-        echo \"$$JWT_PRIVATE_KEY\" > jwt_keys/jwt-private.pem &&
-        echo \"$$JWT_PUBLIC_KEY\" > jwt_keys/jwt-public.pem &&
+        echo \"$JWT_PRIVATE_KEY\" > jwt_keys/jwt-private.pem &&
+        echo \"$JWT_PUBLIC_KEY\" > jwt_keys/jwt-public.pem &&
 
-        alembic upgrade head && uvicorn src.main:app --reload
+        alembic upgrade head && 
+        uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
       "
   db:
     image: postgres:15-alpine
@@ -48,7 +54,7 @@ services:
     image: redis:7-alpine
     container_name: events_redis
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASS}
     volumes:
       - redis_data:/data
     ports:
@@ -56,12 +62,28 @@ services:
     restart: unless-stopped
     networks:
       - app_network
+  pg_admin:
+    image: dpage/pgadmin4:latest
+    container_name: events_pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS}
+    depends_on:
+      - db
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - app_network
 
 volumes:
   jwt_keys:
   postgres_data:
   redis_data:
-
+  pgadmin-data:
+  
 networks:
   app_network:
     driver: bridge
